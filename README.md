@@ -15,6 +15,13 @@ Este repositorio contiene la implementación del backend para **Manager Library*
 
 ---
 
+## 1.1 Decisión Arquitectónica: PHP Hexagonal vs Framework Pesado
+Durante la fase de aprovisionamiento de dependencias, Composer bloqueó la instalación de frameworks pesados (`laravel/framework` y paquetes vinculados) debido a advertencias críticas de seguridad y CVEs activos en el registro de paquetes.
+
+En concordancia con los principios del reto:
+1. **El Spec es el producto, no el framework:** La especificación define contratos de API, reglas de negocio y modelos de datos agnósticos.
+2. **Constitución SDD (Artículos I, II y III):** Se exige que el núcleo de dominio no tenga acoplamiento a frameworks externos. La arquitectura hexagonal en PHP 8.2 nativo garantiza el 100% de aislamiento del dominio, enrutamiento liviano, emisión nativa de JWT HMAC-SHA256 y persistencia en PostgreSQL mediante PDO con transacciones ACID y control de concurrencia optimista (ADR-002).
+
 ## 2. Requisitos Previos
 - PHP 8.2 o superior (con extensiones `pdo_pgsql`, `mbstring`, `fileinfo`).
 - PostgreSQL 16+ en ejecución.
