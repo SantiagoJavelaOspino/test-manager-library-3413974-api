@@ -1,51 +1,91 @@
 # test-manager-library-3413974-api
+**Backend API · Manager Library**  
+*Ficha ADSO 3413974 · SENA*  
+*Metodología:* Spec-Driven Development (SDD) · Stack: PHP 8.2+ · PostgreSQL 16+
 
-> **Prueba técnica · Ficha ADSO 3413974**
-> Horario: de **9:15 a. m. a 3:00 p. m.** (15:00). Después, **feria de presentación** de cada proyecto.
+---
 
-Este repositorio es el **backend** de *Manager Library*, en **PHP con Laravel**. **Empieza vacío a propósito**: se construye en el fork de cada aprendiz.
+## 1. Descripción
+Este repositorio contiene la implementación del backend para **Manager Library**, construido en PHP siguiendo una **Arquitectura Hexagonal / Cebolla (Onion Architecture)** con estricta separación de capas (Constitución Artículos I, II, III y IV).
 
-## Instrucciones
+- **Dominio (`app/Domain`)**: Cero dependencias externas. Invariantes puras (`Book`, `Loan`, `LoanItem`, `Member`, `User`, `Category`) y Value Objects (`Isbn`, `Quantity`, `DateRange`, `Role`, `Username`, `Uuid`).
+- **Aplicación (`app/Application`)**: Puertos desacoplados y casos de uso individuales (SRP).
+- **Infraestructura (`app/Infrastructure`)**: Adaptadores para PostgreSQL (`library` schema), JWT nativo con HMAC SHA-256, hash Bcrypt y almacenamiento en disco de portadas.
+- **HTTP (`app/Http`)**: Enrutador REST bajo `/api/v1` con contrato de error unificado y CORS habilitado.
 
-Cada aprendiz debe **crear el fork** de los seis repositorios del proyecto y **resolver el proyecto
-con el spec planteado**.
+---
 
-1. Hacer fork, a su cuenta de GitHub, de cada repositorio de la tabla del final.
-2. Leer el spec en [`test-manager-library-3413974-docs`](https://github.com/code-sena/test-manager-library-3413974-docs).
-   Se entrega en dos versiones: `spec-python/` y `spec-.net/`.
-3. Desarrollar en los forks.
+## 2. Requisitos Previos
+- PHP 8.2 o superior (con extensiones `pdo_pgsql`, `mbstring`, `fileinfo`).
+- PostgreSQL 16+ en ejecución.
+- Composer 2.x.
 
-## El reto se desarrolla con React y PHP (Laravel)
+---
 
-El spec está escrito para Python y para .NET, pero el reto **no** se hace en esos lenguajes:
+## 3. Instalación y Configuración Local
 
-| Capa | Tecnología del reto |
-|---|---|
-| Frontend | React |
-| Backend | PHP con Laravel |
+1. Clonar el repositorio y acceder a la carpeta:
+   ```bash
+   cd api
+   ```
 
-Lo que el spec define sobre el negocio —historias, criterios de aceptación, reglas, contrato de la
-API, modelo de datos— se respeta. Lo que define sobre la tecnología se traduce a React y Laravel.
+2. Instalar dependencias y generar autoload:
+   ```bash
+   composer install
+   ```
 
-## La prueba no consiste en escribir el código
+3. Configurar variables de entorno:
+   ```bash
+   cp .env.example .env
+   ```
 
-El propósito principal es ver la **capacidad de desempeño con SDD** (*Spec-Driven Development*,
-desarrollo guiado por especificación): cómo se lee, se interpreta y se aplica una especificación
-para llevarla a un stack distinto. El código es el medio, no el fin.
+4. Ejecutar las migraciones y sembrar categorías y admin inicial:
+   ```bash
+   php database/migrations/migrate.php
+   ```
 
-## Feria de presentación
+---
 
-Al cerrar la prueba (3:00 p. m.) cada aprendiz **presenta su proyecto** al grupo: qué construyó del spec, qué dejó fuera y por qué,
-y una demostración corta de lo que funciona (la aplicación y el sitio público). Lo que se presenta es lo que quedó **subido a los forks
-antes de las 3:00 p. m.**: no se presenta nada que no esté en GitHub.
+## 4. Ejecución del Servidor
 
-## Los seis repositorios
+Iniciar el servidor de desarrollo en el puerto 8000:
+```bash
+php -S 0.0.0.0:8000 -t public
+```
 
-| Repositorio | Qué va ahí |
-|---|---|
-| [`test-manager-library-3413974-docs`](https://github.com/code-sena/test-manager-library-3413974-docs) | El spec: `spec-python/` y `spec-.net/` |
-| [`test-manager-library-3413974-api`](https://github.com/code-sena/test-manager-library-3413974-api) | Backend en PHP (Laravel) |
-| [`test-manager-library-3413974-app`](https://github.com/code-sena/test-manager-library-3413974-app) | Frontend en React |
-| [`test-manager-library-3413974-page`](https://github.com/code-sena/test-manager-library-3413974-page) | Sitio público estático de presentación |
-| [`test-manager-library-3413974-infra`](https://github.com/code-sena/test-manager-library-3413974-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
-| [`test-manager-library-3413974-tool`](https://github.com/code-sena/test-manager-library-3413974-tool) | Utilidades: sembrador de datos de demostración |
+El endpoint de salud estará disponible en:
+- `GET http://localhost:8000/api/v1/health` $\rightarrow$ `{"status":"ok"}`
+
+---
+
+## 5. Pruebas Automatizadas
+
+Ejecutar la suite completa de pruebas unitarias, de integración y de reglas arquitectónicas:
+```bash
+php tests/run_tests.php
+```
+
+Resultado verificado:
+- **14/14 pruebas aprobadas**, validando contratos, concurrencia, límites de préstamos, vencimientos y preservación histórica de reportes (ADR-004).
+
+---
+
+## 6. Endpoints Principales (`/api/v1`)
+
+| Método | Ruta | Rol Requerido | Descripción |
+|---|---|---|---|
+| `GET` | `/health` | Público | Verificación de estado |
+| `POST` | `/auth/login` | Público | Autenticación y emisión de JWT |
+| `POST` | `/users` | `admin` | Alta de bibliotecarios |
+| `GET` | `/categories` | Autenticado | Catálogo de las 5 categorías |
+| `GET` | `/books` | Autenticado | Búsqueda y catálogo paginado |
+| `POST` | `/books` | `admin` | Creación de libro |
+| `PUT` | `/books/{id}` | `admin` | Modificación de libro |
+| `DELETE` | `/books/{id}` | `admin` | Baja lógica de libro |
+| `GET` | `/members` | `admin`, `librarian` | Listado y búsqueda de socios |
+| `POST` | `/members` | `admin`, `librarian` | Registro de nuevo socio |
+| `POST` | `/loans` | `admin`, `librarian` | Creación de préstamo (1 a 3 libros) |
+| `GET` | `/loans` | `admin`, `librarian` | Listado de préstamos con estado calculado |
+| `GET` | `/loans/overdue` | `admin`, `librarian` | Listado de libros en mora |
+| `POST` | `/loans/{loan_id}/items/{item_id}/return` | `admin`, `librarian` | Devolución de ejemplar |
+| `GET` | `/reports/most-borrowed` | `admin` | Reporte de más prestados (valores congelados) |

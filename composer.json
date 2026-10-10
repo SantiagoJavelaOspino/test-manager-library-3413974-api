@@ -1,0 +1,26 @@
+{
+    "name": "code-sena/test-manager-library-3413974-api",
+    "type": "project",
+    "description": "Backend API for Manager Library implemented in PHP 8.2 with SDD Onion Architecture",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "firebase/php-jwt": "^6.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Migrations\\": "database/migrations/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}
